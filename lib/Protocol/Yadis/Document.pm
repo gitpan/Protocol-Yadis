@@ -1,5 +1,7 @@
 package Protocol::Yadis::Document;
-use Any::Moose;
+
+use strict;
+use warnings;
 
 use overload '""' => sub { shift->to_string }, fallback => 1;
 
@@ -8,25 +10,31 @@ use Protocol::Yadis::Document::Service::Element;
 
 use XML::LibXML;
 
-has _services => (
-    isa     => 'ArrayRef[Protocol::Yadis::Document::Service]',
-    is      => 'rw',
-    default => sub { [] }
-);
+sub new {
+    my $class = shift;
+    my %param = @_;
+
+    my $self = {};
+    bless $self, $class;
+
+    $self->{_services} ||= [];
+
+    return $self;
+}
 
 sub services {
     my $self = shift;
 
     if (@_) {
-        $self->_services([]);
+        $self->{_services} = [];
 
         return $self;
     }
     else {
         my @priority =
-          grep { defined $_->attr('priority') } @{$self->_services};
+          grep { defined $_->attr('priority') } @{$self->{_services}};
         my @other =
-          grep { not defined $_->attr('priority') } @{$self->_services};
+          grep { not defined $_->attr('priority') } @{$self->{_services}};
 
         my @sorted =
           sort { $a->attr('priority') cmp $b->attr('priority') } @priority;
@@ -35,7 +43,7 @@ sub services {
         return [@sorted];
     }
 
-    return $self->_services;
+    return $self->{_services};
 }
 
 sub parse {
@@ -88,7 +96,7 @@ sub parse {
 
         next unless $s->Type;
 
-        push @{$self->_services}, $s;
+        push @{$self->{_services}}, $s;
     }
 
     return $self;
@@ -143,9 +151,13 @@ Protocol::Yadis::Document - Protocol::Yadis document object
 
 =head1 DESCRIPTION
 
-This is a document object for L<Yadis::Protocol>.
+This is a document object for L<Protocol::Yadis>.
 
 =head1 METHODS
+
+=head2 C<new>
+
+Creates a new L<Protocol::Yadis::Document> instance.
 
 =head2 C<services>
 
@@ -161,11 +173,11 @@ String representation.
 
 =head1 AUTHOR
 
-Viacheslav Tikhanovskii, C<vti@cpan.org>.
+Viacheslav Tykhanovskyi, C<vti@cpan.org>.
 
 =head1 COPYRIGHT
 
-Copyright (C) 2009, Viacheslav Tikhanovskii.
+Copyright (C) 2009, Viacheslav Tykhanovskyi.
 
 This program is free software, you can redistribute it and/or modify it under
 the same terms as Perl 5.10.

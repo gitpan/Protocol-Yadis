@@ -1,6 +1,6 @@
 --- #YAML:1.0
 name:               Protocol-Yadis
-version:            0.501
+version:            0.900101
 abstract:           Asynchronous Yadis implementation
 author:
     - Viacheslav Tykhanovskyi <vti@cpan.org>

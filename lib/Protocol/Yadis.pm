@@ -5,9 +5,11 @@ use warnings;
 
 require Carp;
 
-our $VERSION = '0.501';
-
 use constant DEBUG => $ENV{PROTOCOL_YADIS_DEBUG} || 0;
+
+use Protocol::Yadis::Document;
+
+our $VERSION = '0.900101';
 
 sub new {
     my $class = shift;
@@ -25,9 +27,7 @@ sub new {
 
 sub http_req_cb { shift->{http_req_cb} }
 sub head_first  { shift->{head_first} }
-sub error       { defined $_[1] ? $_[0]->{error} = $_[1] : $_[0]->{error} }
-
-use Protocol::Yadis::Document;
+sub error       { @_ > 1 ? $_[0]->{error} = $_[1] : $_[0]->{error} }
 
 sub discover {
     my $self = shift;
@@ -160,9 +160,13 @@ sub _initial_get_req {
                 my $document = $self->_parse_document($headers, $body);
                 return $cb->($self, $document) if $document;
 
-                warn 'Found HMTL' if DEBUG;
+                warn 'Found HTML' if DEBUG;
                 my ($head) = ($body =~ m/<\s*head\s*>(.*?)<\/\s*head\s*>/is);
-                return $cb->($self) unless $head;
+
+                unless ($head) {
+                    $self->error('No <head> was found');
+                    return $cb->($self);
+                }
 
                 my $location;
                 my $tags = _html_tag(\$head);
@@ -180,8 +184,9 @@ sub _initial_get_req {
 
                 $self->{_resource} = $location if $location;
             }
-
-            warn 'no body was found' if DEBUG;
+            else {
+                warn 'No body was found' if DEBUG;
+            }
 
             return $cb->($self);
         }
@@ -200,14 +205,23 @@ sub _second_req {
         undef => sub {
             my ($url, $status, $headers, $body) = @_;
 
-            return $cb->($self) unless $status && $status == 200;
+            unless ($status && $status == 200) {
+                $self->error("Wrong status: $status");
+                return $cb->($self);
+            }
 
-            return $cb->($self) unless $body;
+            unless ($body) {
+                $self->error('No body was found');
+                return $cb->($self);
+            }
 
-            my $document = $self->_parse_document($headers, $body);
-            return $cb->($self, $document) if $document;
+            if (my $document = $self->_parse_document($headers, $body)) {
+                warn 'XRDS Document was found' if DEBUG;
+                return $cb->($self, $document);
+            }
 
-            rerturn $cb->($self);
+            $self->error('No XRDS Document was found');
+            return $cb->($self);
         }
     );
 }

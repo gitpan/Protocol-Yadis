@@ -13,9 +13,10 @@ WriteMakefile(
         : ()),
     PL_FILES  => {},
     PREREQ_PM => {
-        'Test::More'  => 0,
-        'XML::LibXML' => 0
+        'Test::More'  => '0',
+        'XML::LibXML' => '2.0108'
     },
     dist  => {COMPRESS => 'gzip -9f', SUFFIX => 'gz'},
+    test  => {TESTS    => 't/*.t t/*/*.t'},
     clean => {FILES    => 'Protocol-Yadis-*'}
 );

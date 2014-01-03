@@ -1,10 +1,11 @@
+flowcontrol.dia
+flowcontrol.png
 lib/Protocol/Yadis.pm
 lib/Protocol/Yadis/Document.pm
 lib/Protocol/Yadis/Document/Service.pm
 lib/Protocol/Yadis/Document/Service/Element.pm
 Makefile.PL
 MANIFEST			This list of files
-MANIFEST.SKIP
 t/00pod.t
 t/01pod-coverage.t
 t/discovery/scenario-initial-get.t
@@ -13,4 +14,5 @@ t/discovery/scenario-second.t
 t/document.t
 t/document/service-element.t
 t/document/service.t
-META.yml                                 Module meta-data (added by MakeMaker)
+META.yml                                 Module YAML meta-data (added by MakeMaker)
+META.json                                Module JSON meta-data (added by MakeMaker)
